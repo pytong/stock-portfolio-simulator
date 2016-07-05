@@ -20,7 +20,8 @@ var StockPortfolioSimulator = React.createClass({
       this.setState({total: total});
 
     trades = this.state.trades;
-    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total})
+    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total});
+    trades.reverse();
     this.setState({trades: trades});
     }
   },
@@ -51,8 +52,8 @@ var TradeList = React.createClass({
     });
 
     return (
-      <div>
-      {tradeNodes}
+      <div className="tradeList">
+        {tradeNodes}
       </div>
     );
   }
@@ -72,7 +73,7 @@ var TransactionForm = React.createClass({
   },
 
   handleSymbolChange: function(e) {
-    this.setState({symbol: e.target.value});
+    this.setState({symbol: e.target.value.toUpperCase()});
   },
 
   handlePriceChange: function(e) {
