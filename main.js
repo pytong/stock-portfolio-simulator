@@ -17,6 +17,7 @@ var StockPortfolioSimulator = React.createClass({
 
       priceDiff = transaction.price - entryPrice;
       percentageDiff = (priceDiff / entryPrice) * 100;
+      percentageDiff = Number((percentageDiff).toFixed(2));
 
       total = total + total * (priceDiff / entryPrice);
       total = Number((total).toFixed(2));
