@@ -1,9 +1,16 @@
-.total, .transaction, .tradeList {
-  font-size: 24px;
+.total, .transaction, .tradeList, .transactionInput input  {
+  font-size: 22px;
   margin: 5px;
 }
 
-.transactionInput input {
-  font-size: 20px;
-  margin: 5px;
+.gain, .loss {
+  margin: 10px;
+}
+
+.gain {
+  color: green;
+}
+
+.loss {
+  color: red;
 }

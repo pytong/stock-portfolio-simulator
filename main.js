@@ -10,17 +10,20 @@ var StockPortfolioSimulator = React.createClass({
       this.state.entryPrice = transactionPrice;
     } else {
       var priceDiff,
+          percentageDiff,
           trades,
           total = this.state.total,
           entryPrice = this.state.entryPrice;
 
       priceDiff = transaction.price - entryPrice;
+      percentageDiff = (priceDiff / entryPrice) * 100;
+
       total = total + total * (priceDiff / entryPrice);
       total = Number((total).toFixed(2));
       this.setState({total: total});
 
     trades = this.state.trades;
-    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total});
+    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total, percentageDiff: percentageDiff});
     trades.reverse();
     this.setState({trades: trades});
     }
@@ -61,8 +64,13 @@ var TradeList = React.createClass({
 
 var Trade = React.createClass({
   render: function() {
+    var percentageDiff = this.props.trade.percentageDiff;
+
     return (
-      <div className="trade">{this.props.trade.symbol}. Bought@{this.props.trade.entryPrice}. Sold@{this.props.trade.exitPrice}. Total: {this.props.trade.total}</div>
+      <div className="trade">
+        {this.props.trade.symbol}. Bought@{this.props.trade.entryPrice}. Sold@{this.props.trade.exitPrice}. Total: {this.props.trade.total}
+        <span className={percentageDiff >= 0 ? 'gain' : 'loss'}>{percentageDiff}%</span>
+      </div>
     );
   }
 });
@@ -97,8 +105,6 @@ var TransactionForm = React.createClass({
   },
 
   render: function() {
-
-
     return (
         <form className="transactionInput">
           <input
