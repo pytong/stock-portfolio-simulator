@@ -1,19 +1,28 @@
 var StockPortfolioSimulator = React.createClass({
   getInitialState: function() {
-    return {total: 10000, transactions: []};
+    return {total: 10000, trades: []};
   },
 
   updatePorfolio: function(transaction) {
-    var total,
-      transactions;
+    var transactionPrice = +transaction.price;
 
-    total = this.state.total;
-    total = total + +transaction.price;
-    this.setState({total: total});
+    if(transaction.type == "BUY") {
+      this.state.entryPrice = transactionPrice;
+    } else {
+      var priceDiff,
+          trades,
+          total = this.state.total,
+          entryPrice = this.state.entryPrice;
 
-    transactions = this.state.transactions;
-    transactions.push(transaction);
-    this.setState({transactions: transactions});
+      priceDiff = transaction.price - entryPrice;
+      total = total + total * (priceDiff / entryPrice);
+      total = Number((total).toFixed(2));
+      this.setState({total: total});
+
+    trades = this.state.trades;
+    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total})
+    this.setState({trades: trades});
+    }
   },
 
   render: function() {
@@ -21,32 +30,38 @@ var StockPortfolioSimulator = React.createClass({
       <div>
         <div className="total">${this.state.total}</div>
         <TransactionForm updatePorfolioCallback={this.updatePorfolio} />
-        <TransactionList transactions={this.state.transactions}/>
+        <TradeList trades={this.state.trades}/>
       </div>
     );
   }
 });
 
-var TransactionList = React.createClass({
+var TradeList = React.createClass({
+  generateTransactionId: function() {
+    return Math.floor((Math.random() * 1000000) + 1);
+  },
+
   render: function() {
-    var transactionNodes = this.props.transactions.map(function(transaction) {
+    var _this = this,
+
+    tradeNodes = this.props.trades.map(function(trade) {
       return (
-        <Transaction key={transaction.id} transaction={transaction} />
+        <Trade key={_this.generateTransactionId()} trade={trade} />
       );
     });
 
     return (
       <div>
-      {transactionNodes}
+      {tradeNodes}
       </div>
     );
   }
 });
 
-var Transaction = React.createClass({
+var Trade = React.createClass({
   render: function() {
     return (
-      <div className="transaction">{this.props.transaction.symbol} @ {this.props.transaction.price}</div>
+      <div className="trade">{this.props.trade.symbol}. Bought@{this.props.trade.entryPrice}. Sold@{this.props.trade.exitPrice}. Total: {this.props.trade.total}</div>
     );
   }
 });
@@ -54,10 +69,6 @@ var Transaction = React.createClass({
 var TransactionForm = React.createClass({
   getInitialState: function() {
     return {symbol: '', price: '', type: 'BUY'};
-  },
-
-  generateTransactionId: function() {
-    return Math.floor((Math.random() * 1000000) + 1);
   },
 
   handleSymbolChange: function(e) {
@@ -69,21 +80,19 @@ var TransactionForm = React.createClass({
   },
 
   handlePortofioUpdate: function(e) {
-    var id,
-        type;
+    var type;
 
     e.preventDefault();
 
-    id = this.generateTransactionId();
-    this.props.updatePorfolioCallback({id: id, symbol: this.state.symbol, price: this.state.price, type: this.state.type});
+    this.props.updatePorfolioCallback({symbol: this.state.symbol, price: this.state.price, type: this.state.type});
 
     if(this.state.type == "BUY") {
       this.setState({type: "SELL"});
     } else {
-      this.setState({type: "BUY"});
+      this.setState({type: "BUY", symbol: ''});
     }
 
-    this.setState({symbol: '', price: ''});
+    this.setState({price: ''});
   },
 
   render: function() {
@@ -95,6 +104,7 @@ var TransactionForm = React.createClass({
             type="text"
             placeholder="symbol"
             value={this.state.symbol}
+            disabled={this.state.type == 'SELL'}
             onChange={this.handleSymbolChange}
           />
           <input
