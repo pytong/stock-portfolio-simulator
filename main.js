@@ -8,6 +8,7 @@ var StockPortfolioSimulator = React.createClass({
 
     if(transaction.type == "BUY") {
       this.state.entryPrice = transactionPrice;
+      $(".current-position").text("Bought " + transaction.symbol + " @ " + transaction.price);
     } else {
       var priceDiff,
           percentageDiff,
@@ -23,17 +24,22 @@ var StockPortfolioSimulator = React.createClass({
       total = Number((total).toFixed(2));
       this.setState({total: total});
 
-    trades = this.state.trades;
-    trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total, percentageDiff: percentageDiff});
-    trades.reverse();
-    this.setState({trades: trades});
+      trades = this.state.trades;
+      trades.push({symbol: transaction.symbol, entryPrice: entryPrice, exitPrice: transactionPrice, total: total, percentageDiff: percentageDiff});
+      trades.reverse();
+      this.setState({trades: trades});
+
+      $(".current-position").text("");
     }
   },
 
   render: function() {
     return (
       <div>
-        <div className="total">${this.state.total}</div>
+        <div>
+          <span className="total">${this.state.total}</span>
+          <span className="current-position"></span>
+        </div>
         <TransactionForm updatePorfolioCallback={this.updatePorfolio} />
         <TradeList trades={this.state.trades}/>
       </div>
